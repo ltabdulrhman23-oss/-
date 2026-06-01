@@ -18,6 +18,7 @@
             --panel-dark: #0b0e15;
             --iraqi-shadhar: #00d2ff;
             --iraqi-kahraman: #ffb300;
+            --soundcloud-orange: #ff5500;
             --soft-green: #2ecc71;
             --btn-disabled: #131722;
         }
@@ -44,14 +45,13 @@
 
         .top-player { transform: rotate(180deg); }
 
-        /* الحزام المركزي المعدل ليتسع للمشغل الأصلي */
         .center-bar {
             background: #0e121a;
             border-top: 1px dashed rgba(0, 210, 255, 0.15);
             border-bottom: 1px dashed rgba(255, 179, 0, 0.15);
-            padding: 8px 10px; display: flex;
+            padding: 6px 10px; display: flex;
             justify-content: space-between; align-items: center;
-            z-index: 10; gap: 6px;
+            z-index: 10; gap: 8px;
         }
 
         .top-player.active-turn { border-color: rgba(255, 179, 0, 0.25); box-shadow: inset 0 0 20px rgba(255, 179, 0, 0.05); }
@@ -127,24 +127,36 @@
             font-family: 'Tajawal', sans-serif; cursor: pointer;
         }
 
-        /* تصميم كادر مشغل ساوند كلاود المدمج المتوافق مع التصميم المظلم للعبة */
-        .sc-embed-container {
-            flex: 1;
-            max-width: 170px;
-            height: 34px;
-            display: flex;
-            align-items: center;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #20293a;
-            background: #000;
+        /* زر الراديو التراثي المتوهج */
+        .tarab-btn {
+            background: rgba(255, 85, 0, 0.04);
+            border: 1px solid rgba(255, 85, 0, 0.25);
+            color: var(--soundcloud-orange);
+            padding: 6px 12px;
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 700; border-radius: 8px;
+            cursor: pointer; transition: all 0.2s ease;
+            font-family: 'Tajawal', sans-serif; flex: 1; justify-content: center; max-width: 150px;
+        }
+        .tarab-btn.playing {
+            background: rgba(255, 85, 0, 0.15);
+            border-color: var(--soundcloud-orange);
+            box-shadow: 0 0 12px rgba(255, 85, 0, 0.25);
         }
 
-        .sc-embed-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .audio-visualizer {
+            display: flex; align-items: flex-end; gap: 2px; width: 12px; height: 10px;
         }
+        .audio-visualizer span {
+            display: block; width: 2px; background: var(--soundcloud-orange); height: 2px; border-radius: 0.5px;
+        }
+        .tarab-btn.playing .audio-visualizer span {
+            animation: bounceVisualizer 0.5s infinite alternate;
+        }
+        .tarab-btn.playing .audio-visualizer span:nth-child(2) { animation-delay: 0.15s; }
+        .tarab-btn.playing .audio-visualizer span:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes bounceVisualizer { 0% { height: 2px; } 100% { height: 10px; } }
 
         .history-container { width: 88%; max-width: 320px; margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
         .history-label { font-size: 10px; color: #49566e; text-align: right; }
@@ -189,14 +201,17 @@
         <div class="shake-hint" id="shake-p2">أو هز التلفون حتى ترمي</div>
     </div>
 
-    <!-- الحزام المركزي المطور بالمشغل المباشر الآمن للموبايل -->
+    <!-- الحزام المركزي العراقي المطور -->
     <div class="center-bar">
-        <button class="center-btn" onclick="determineStarter(); requestSensorPermission();" style="padding: 6px 6px;">🎲 قرعة</button>
+        <button class="center-btn" onclick="determineStarter(); requestSensorPermission();" style="padding: 6px 8px;">🎲 منو يبدي؟</button>
         
-        <!-- مشغل ساوند كلاود المصغر الأصلي بقائمتك الشخصية - حماية 100% من الحظر -->
-        <div class="sc-embed-container">
-            <iframe src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/ganat-ganat-412122592/sets/j0eltcfsmhvv&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false&single_active=true"></iframe>
-        </div>
+        <!-- زر تشغيل الأغاني المرفوعة محلياً المانع للحجب -->
+        <button class="tarab-btn" id="tarabRadioBtn" onclick="toggleLocalTarab(); requestSensorPermission();">
+            <div class="audio-visualizer" id="audioVis">
+                <span></span><span></span><span></span>
+            </div>
+            <span id="tarabTrackName">📻 شغل النغم المرفوع</span>
+        </button>
 
         <div style="display: flex; gap: 4px; align-items: center;">
             <button class="center-btn" onclick="toggleFullscreen()" style="padding: 6px 6px;">🖥️</button>
@@ -235,6 +250,52 @@
         let winScores = { 1: 0, 2: 0 };
         let wakeLock = null;
         let motionPermissionGranted = false;
+
+        // مصفوفة الأغاني المرفوعة على حسابك (تستطيع تعديل المسميات هنا حسب رغبتك)
+        const localPlaylist = [
+            { name: "🎶 نغم عراقي 1", url: "1.mp3" },
+            { name: "🎶 نغم عراقي 2", url: "2.mp3" },
+            { name: "🎶 نغم عراقي 3", url: "3.mp3" }
+        ];
+
+        let currentAudio = null;
+        let lastPlayedIndex = -1;
+
+        // محرك تشغيل وتبديل الملفات المحلية المرفوعة عشوائياً بشكل فوري
+        function toggleLocalTarab() {
+            if (currentAudio && !currentAudio.paused) {
+                currentAudio.pause();
+                document.getElementById('tarabTrackName').innerText = "استراحة نغم";
+                document.getElementById('audioVis').classList.remove('playing');
+                document.getElementById('tarabRadioBtn').classList.remove('playing');
+                return;
+            }
+
+            let randomIndex;
+            // اختيار أغنية مختلفة في كل مرة
+            do {
+                randomIndex = Math.floor(Math.random() * localPlaylist.length);
+            } while (randomIndex === lastPlayedIndex && localPlaylist.length > 1);
+            
+            lastPlayedIndex = randomIndex;
+            const track = localPlaylist[randomIndex];
+
+            currentAudio = new Audio(track.url);
+
+            currentAudio.addEventListener('play', function() {
+                document.getElementById('tarabTrackName').innerText = track.name;
+                document.getElementById('audioVis').classList.add('playing');
+                document.getElementById('tarabRadioBtn').classList.add('playing');
+            });
+
+            currentAudio.addEventListener('ended', function() {
+                toggleLocalTarab(); // شغل أغنية عشوائية أخرى فور انتهاء الحالية
+            });
+
+            currentAudio.play().catch(e => {
+                alert("يرجى الضغط على الشاشة أولاً لتفعيل تشغيل الصوت");
+            });
+        }
 
         async function requestSensorPermission() {
             if (motionPermissionGranted) return;
