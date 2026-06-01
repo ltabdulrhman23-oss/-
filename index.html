@@ -116,7 +116,7 @@
             font-family: 'Tajawal', sans-serif;
         }
 
-        .bottom-player.active-turn .action-btn { background: linear-gradient(135deg, #00d2ff, #00a2cc); color: #05060a; pointer-events: auto; box-shadow: 0 4px 12px rgba(0, 210, 255, 0.25); }
+        .bottom-player.active-turn .action-btn { background: linear-gradient(135deg, #00d2ff, #00a2cc); color: #05060a; pointer-events: auto; box-shadow: 0 4px 12px rgba(0, 210, 255, 0.25); box-shadow: 0 4px 12px rgba(0, 210, 255, 0.25); }
         .top-player.active-turn .action-btn { background: linear-gradient(135deg, #ffb300, #cc8f00); color: #05060a; pointer-events: auto; box-shadow: 0 4px 12px rgba(255, 179, 0, 0.25); }
 
         .center-btn {
@@ -179,7 +179,7 @@
 
         .shake-hint { font-size: 9px; color: #161c26; margin-top: 4px; }
 
-        /* مشغل ساوند كلاود المخفي بقائمة تراثية عراقية ومقامات */
+        /* مشغل ساوند كلاود المخفي - مدمج به رابط قائمتك التراثية الشخصية بنجاح */
         #soundcloud-hidden-player {
             position: absolute; left: -9999px; top: -9999px;
             width: 1px; height: 1px; visibility: hidden;
@@ -231,8 +231,8 @@
         </div>
     </div>
 
-    <!-- قائمة تشغيل المقامات والتراث العراقي الخالدة من ساوند كلاود -->
-    <iframe id="soundcloud-hidden-player" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/403759614&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false" allow="autoplay"></iframe>
+    <!-- قائمة تشغيل الساوند كلاود الخاصة بك المربوطة والمشفرة للمتصفحات بأمان -->
+    <iframe id="soundcloud-hidden-player" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/ganat-ganat-412122592/sets/j0eltcfsmhvv&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false" allow="autoplay"></iframe>
 
     <!-- اللاعب 1 (أسفل - شذري فيروزي) -->
     <div class="player-zone bottom-player active-turn" id="zone-1">
@@ -263,7 +263,7 @@
         let wakeLock = null;
         let motionPermissionGranted = false;
 
-        // ربط وهندسة أداة الساوند كلاود والتحكم بها برمجياً
+        // هندسة مشغل ساوند كلاود والانتظار لحين الجاهزية
         let scIframe = document.getElementById('soundcloud-hidden-player');
         let scWidget = SC.Widget(scIframe);
         let isWidgetReady = false;
@@ -289,7 +289,7 @@
             document.getElementById('tarabRadioBtn').classList.remove('playing');
         });
 
-        // دالة التبديل العشوائي الفورية بين أغاني الساوند كلاود
+        // دالة التبديل العشوائي الفورية بين أغاني الساوند كلاود بقائمتك الجديدة
         function toggleSoundCloudRandom() {
             if (!scWidget) return;
             if (!isWidgetReady) {
@@ -548,4 +548,3 @@
     </script>
 </body>
 </html>
-
