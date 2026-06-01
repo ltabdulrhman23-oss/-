@@ -45,14 +45,45 @@
 
         .top-player { transform: rotate(180deg); }
 
+        /* --- تصميم الشريط الوسطي الفخم والجديد --- */
         .center-bar {
-            background: #0e121a;
-            border-top: 1px dashed rgba(0, 210, 255, 0.15);
-            border-bottom: 1px dashed rgba(255, 179, 0, 0.15);
-            padding: 6px 10px; display: flex;
-            justify-content: space-between; align-items: center;
-            z-index: 10; gap: 8px;
+            background: linear-gradient(180deg, #0b0f19 0%, #06080e 100%);
+            border-top: 2px solid rgba(0, 210, 255, 0.25);
+            border-bottom: 2px solid rgba(255, 179, 0, 0.25);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.08), inset 0 1px 0 rgba(255,255,255,0.03);
+            padding: 10px 16px; 
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            z-index: 10; 
+            gap: 10px;
         }
+
+        /* أنيميشن الأيقونات المتحركة */
+        @keyframes diceFloat {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-3px) rotate(10deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        @keyframes radioPulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 8px var(--soundcloud-orange); }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+        @keyframes spinIcon {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes screenGlow {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        /* تطبيق الحركات على الأيقونات */
+        .ani-dice { display: inline-block; animation: diceFloat 2s infinite ease-in-out; }
+        .ani-radio { display: inline-block; animation: radioPulse 1.5s infinite ease-in-out; }
+        .tarab-btn.playing .ani-radio { animation: spinIcon 3s infinite linear !important; }
+        .ani-screen { display: inline-block; animation: screenGlow 2s infinite alternate ease-in-out; }
 
         .top-player.active-turn { border-color: rgba(255, 179, 0, 0.25); box-shadow: inset 0 0 20px rgba(255, 179, 0, 0.05); }
         .bottom-player.active-turn { border-color: rgba(0, 210, 255, 0.25); box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.05); }
@@ -116,32 +147,39 @@
         .bottom-player.active-turn .action-btn { background: linear-gradient(135deg, #00d2ff, #00a2cc); color: #05060a; pointer-events: auto; box-shadow: 0 4px 12px rgba(0, 210, 255, 0.25); }
         .top-player.active-turn .action-btn { background: linear-gradient(135deg, #ffb300, #cc8f00); color: #05060a; pointer-events: auto; box-shadow: 0 4px 12px rgba(255, 179, 0, 0.25); }
 
+        /* تحديث استايل الأزرار لتتناسب مع فخامة الحزام */
         .center-btn {
-            background: #141924; border: 1px solid #20293a; color: #cbd5e1;
-            padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
-            cursor: pointer; transition: 0.2s; font-family: 'Tajawal', sans-serif;
+            background: #131a2a; border: 1px solid #222f4c; color: #cbd5e1;
+            padding: 7px 12px; border-radius: 10px; font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; font-family: 'Tajawal', sans-serif;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+        .center-btn:active { transform: scale(0.95); background: #1a253d; }
+
         .sound-select {
-            background: #141924; border: 1px solid #20293a; color: var(--iraqi-kahraman);
-            padding: 5px; border-radius: 8px; font-size: 11px; font-weight: 700; outline: none;
-            font-family: 'Tajawal', sans-serif; cursor: pointer;
+            background: #131a2a; border: 1px solid #222f4c; color: var(--iraqi-kahraman);
+            padding: 6px; border-radius: 10px; font-size: 12px; font-weight: 700; outline: none;
+            font-family: 'Tajawal', sans-serif; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        /* زر الراديو التراثي المتوهج */
+        /* زر الراديو التراثي المطور مع إضاءة خفيفة */
         .tarab-btn {
-            background: rgba(255, 85, 0, 0.04);
-            border: 1px solid rgba(255, 85, 0, 0.25);
-            color: var(--soundcloud-orange);
-            padding: 6px 12px;
-            display: flex; align-items: center; gap: 6px;
-            font-size: 11px; font-weight: 700; border-radius: 8px;
+            background: rgba(255, 85, 0, 0.05);
+            border: 1px solid rgba(255, 85, 0, 0.3);
+            color: #ff661a;
+            padding: 7px 14px;
+            display: flex; align-items: center; gap: 8px;
+            font-size: 12px; font-weight: 700; border-radius: 10px;
             cursor: pointer; transition: all 0.2s ease;
-            font-family: 'Tajawal', sans-serif; flex: 1; justify-content: center; max-width: 150px;
+            font-family: 'Tajawal', sans-serif; flex: 1; justify-content: center; max-width: 160px;
+            box-shadow: 0 2px 6px rgba(255, 85, 0, 0.05);
         }
+        .tarab-btn:active { transform: scale(0.95); }
         .tarab-btn.playing {
             background: rgba(255, 85, 0, 0.15);
             border-color: var(--soundcloud-orange);
-            box-shadow: 0 0 12px rgba(255, 85, 0, 0.25);
+            color: #fff;
+            box-shadow: 0 0 14px rgba(255, 85, 0, 0.3);
         }
 
         .audio-visualizer {
@@ -149,14 +187,16 @@
         }
         .audio-visualizer span {
             display: block; width: 2px; background: var(--soundcloud-orange); height: 2px; border-radius: 0.5px;
+            transition: background 0.2s;
         }
         .tarab-btn.playing .audio-visualizer span {
+            background: #fff;
             animation: bounceVisualizer 0.5s infinite alternate;
         }
         .tarab-btn.playing .audio-visualizer span:nth-child(2) { animation-delay: 0.15s; }
         .tarab-btn.playing .audio-visualizer span:nth-child(3) { animation-delay: 0.3s; }
 
-        @keyframes bounceVisualizer { 0% { height: 2px; } 100% { height: 10px; } }
+        @keyframes bounceVisualizer { 0% { height: 2px; } 100% { height: 11px; } }
 
         .history-container { width: 88%; max-width: 320px; margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
         .history-label { font-size: 10px; color: #49566e; text-align: right; }
@@ -201,20 +241,25 @@
         <div class="shake-hint" id="shake-p2">أو هز التلفون حتى ترمي</div>
     </div>
 
-    <!-- الحزام المركزي العراقي المطور -->
+    <!-- الحزام المركزي العراقي المطور بتصميم فخم وأيقونات متحركة -->
     <div class="center-bar">
-        <button class="center-btn" onclick="determineStarter(); requestSensorPermission();" style="padding: 6px 8px;">🎲 منو يبدي؟</button>
+        <button class="center-btn" onclick="determineStarter(); requestSensorPermission();">
+            <span class="ani-dice">🎲</span> منو يبدي؟
+        </button>
         
-        <!-- زر تشغيل الأغاني المرفوعة محلياً المانع للحجب -->
+        <!-- زر تشغيل الأغاني المحلية المرفوعة بأيقونة تفاعلية متوهجة متحركة -->
         <button class="tarab-btn" id="tarabRadioBtn" onclick="toggleLocalTarab(); requestSensorPermission();">
             <div class="audio-visualizer" id="audioVis">
                 <span></span><span></span><span></span>
             </div>
-            <span id="tarabTrackName">📻 شغل النغم المرفوع</span>
+            <span class="ani-radio">📻</span>
+            <span id="tarabTrackName">شغل النغم</span>
         </button>
 
-        <div style="display: flex; gap: 4px; align-items: center;">
-            <button class="center-btn" onclick="toggleFullscreen()" style="padding: 6px 6px;">🖥️</button>
+        <div style="display: flex; gap: 6px; align-items: center;">
+            <button class="center-btn" onclick="toggleFullscreen()" style="padding: 7px 10px;">
+                <span class="ani-screen">🖥️</span>
+            </button>
             <select class="sound-select" id="soundProfile">
                 <option value="wood">🪵 خشب</option>
                 <option value="crystal">💎 عاج</option>
@@ -251,7 +296,7 @@
         let wakeLock = null;
         let motionPermissionGranted = false;
 
-        // مصفوفة الأغاني المرفوعة على حسابك (تستطيع تعديل المسميات هنا حسب رغبتك)
+        // مصفوفة الأغاني المرفوعة على حسابك
         const localPlaylist = [
             { name: "🎶 نغم عراقي 1", url: "1.mp3" },
             { name: "🎶 نغم عراقي 2", url: "2.mp3" },
@@ -261,7 +306,6 @@
         let currentAudio = null;
         let lastPlayedIndex = -1;
 
-        // محرك تشغيل وتبديل الملفات المحلية المرفوعة عشوائياً بشكل فوري
         function toggleLocalTarab() {
             if (currentAudio && !currentAudio.paused) {
                 currentAudio.pause();
@@ -272,7 +316,6 @@
             }
 
             let randomIndex;
-            // اختيار أغنية مختلفة في كل مرة
             do {
                 randomIndex = Math.floor(Math.random() * localPlaylist.length);
             } while (randomIndex === lastPlayedIndex && localPlaylist.length > 1);
@@ -289,7 +332,7 @@
             });
 
             currentAudio.addEventListener('ended', function() {
-                toggleLocalTarab(); // شغل أغنية عشوائية أخرى فور انتهاء الحالية
+                toggleLocalTarab(); 
             });
 
             currentAudio.play().catch(e => {
