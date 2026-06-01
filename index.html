@@ -116,18 +116,13 @@
             font-family: 'Tajawal', sans-serif;
         }
 
-        .bottom-player.active-turn .action-btn { background: linear-gradient(135deg, #00d2ff, #00a2cc); color: #05060a; pointer-events: auto; box-shadow: 0 4px 12px rgba(0, 210, 255, 0.25); box-shadow: 0 4px 12px rgba(0, 210, 255, 0.25); }
+        .bottom-player.active-turn .action-btn { background: linear-gradient(135deg, #00d2ff, #00a2cc); color: #05060a; pointer-events: auto; box-shadow: 0 4px 12px rgba(0, 210, 255, 0.25); }
         .top-player.active-turn .action-btn { background: linear-gradient(135deg, #ffb300, #cc8f00); color: #05060a; pointer-events: auto; box-shadow: 0 4px 12px rgba(255, 179, 0, 0.25); }
 
         .center-btn {
             background: #141924; border: 1px solid #20293a; color: #cbd5e1;
             padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
             cursor: pointer; transition: 0.2s; font-family: 'Tajawal', sans-serif;
-        }
-        .sound-select {
-            background: #141924; border: 1px solid #20293a; color: var(--iraqi-kahraman);
-            padding: 5px; border-radius: 8px; font-size: 11px; font-weight: 700; outline: none;
-            font-family: 'Tajawal', sans-serif; cursor: pointer;
         }
 
         /* زر ساوند كلاود البرتقالي المتوهج */
@@ -179,7 +174,7 @@
 
         .shake-hint { font-size: 9px; color: #161c26; margin-top: 4px; }
 
-        /* مشغل ساوند كلاود المخفي - مدمج به رابط قائمتك التراثية الشخصية بنجاح */
+        /* مشغل ساوند كلاود المخفي */
         #soundcloud-hidden-player {
             position: absolute; left: -9999px; top: -9999px;
             width: 1px; height: 1px; visibility: hidden;
@@ -188,7 +183,7 @@
 </head>
 <body>
 
-    <!-- اللاعب 2 (أعلى - كهرماني ملكي) -->
+    <!-- اللاعب 2 -->
     <div class="player-zone top-player" id="zone-2">
         <div class="player-header">
             <input type="text" class="name-input" value="اللاعب 2" id="name-p2" onchange="saveAndSync()">
@@ -212,9 +207,9 @@
 
     <!-- الحزام المركزي العراقي المطور -->
     <div class="center-bar">
-        <button class="center-btn" onclick="determineStarter(); requestSensorPermission();" style="padding: 6px 8px;">🎲 منو يبدي؟</button>
+        <button class="center-btn" onclick="determineStarter(); requestSensorPermission();" style="padding: 6px 8px;">🎲 منو يبدي?</button>
         
-        <!-- زر ساوند كلاود المطور -->
+        <!-- زر ساوند كلاود المطور بنظام الاستدعاء المباشر المانع للحجب -->
         <button class="tarab-btn" id="tarabRadioBtn" onclick="toggleSoundCloudRandom(); requestSensorPermission();">
             <div class="audio-visualizer" id="audioVis">
                 <span></span><span></span><span></span>
@@ -231,10 +226,10 @@
         </div>
     </div>
 
-    <!-- قائمة تشغيل الساوند كلاود الخاصة بك المربوطة والمشفرة للمتصفحات بأمان -->
+    <!-- قائمة تشغيل الساوند كلاود الخاصة بك -->
     <iframe id="soundcloud-hidden-player" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/ganat-ganat-412122592/sets/j0eltcfsmhvv&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false" allow="autoplay"></iframe>
 
-    <!-- اللاعب 1 (أسفل - شذري فيروزي) -->
+    <!-- اللاعب 1 -->
     <div class="player-zone bottom-player active-turn" id="zone-1">
         <div class="player-header">
             <input type="text" class="name-input" value="اللاعب 1" id="name-p1" onchange="saveAndSync()">
@@ -263,13 +258,20 @@
         let wakeLock = null;
         let motionPermissionGranted = false;
 
-        // هندسة مشغل ساوند كلاود والانتظار لحين الجاهزية
+        // ربط وهندسة مشغل ساوند كلاود
         let scIframe = document.getElementById('soundcloud-hidden-player');
         let scWidget = SC.Widget(scIframe);
         let isWidgetReady = false;
+        let totalTracksCount = 0; // تخزين عدد الأغاني لمنع حظر الصوت بالموبايل
 
         scWidget.bind(SC.Widget.Events.READY, function() {
             isWidgetReady = true;
+            // جلب عدد الأغاني مسبقاً وتخزينه في الذاكرة لتفادي الـ Async الحاظر للصوت
+            scWidget.getSounds(function(sounds) {
+                if (sounds && sounds.length > 0) {
+                    totalTracksCount = sounds.length;
+                }
+            });
         });
 
         scWidget.bind(SC.Widget.Events.PLAY, function() {
@@ -289,23 +291,20 @@
             document.getElementById('tarabRadioBtn').classList.remove('playing');
         });
 
-        // دالة التبديل العشوائي الفورية بين أغاني الساوند كلاود بقائمتك الجديدة
+        // دالة التبديل العشوائي الفورية المتوافقة مع حماية الموبايل (User Gesture Strict Mode)
         function toggleSoundCloudRandom() {
             if (!scWidget) return;
-            if (!isWidgetReady) {
+            
+            // إذا لم تجهز الأكواد بعد، يعمل كـ Play/Pause تقليدي لحين جلب البيانات
+            if (!isWidgetReady || totalTracksCount === 0) {
                 scWidget.toggle();
                 return;
             }
             
-            scWidget.getSounds(function(sounds) {
-                if(sounds && sounds.length > 0) {
-                    let randomIndex = Math.floor(Math.random() * sounds.length);
-                    scWidget.skip(randomIndex);
-                    scWidget.play();
-                } else {
-                    scWidget.toggle();
-                }
-            });
+            // اختيار فوري ومتزامن يكسر حظر المتصفح
+            let randomIndex = Math.floor(Math.random() * totalTracksCount);
+            scWidget.skip(randomIndex);
+            scWidget.play();
         }
 
         async function requestSensorPermission() {
@@ -326,7 +325,6 @@
 
         const singleNames = { 1: "يك", 2: "دو", 3: "سه", 4: "جهار", 5: "بنج", 6: "شش" };
         
-        // قاموس المسميات التراثية المصحح بالكامل
         function getComboName(r1, r2) {
             if (r1 === r2) {
                 return { 1: "هب يك!", 2: "دُبَرا!", 3: "دُوسة!", 4: "دورْجي!", 5: "دَبَش!", 6: "دوش الباشا!!" }[r1];
@@ -453,7 +451,6 @@
             }, 60);
         }
 
-        // عزل زارات كل لاعب بشكل مستقل ومنع تأثير المرآة تماماً
         function roll(playerNum) {
             if (isRolling || activePlayer !== playerNum) return;
             isRolling = true;
