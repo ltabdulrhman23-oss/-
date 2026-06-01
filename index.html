@@ -10,9 +10,6 @@
     <meta property="og:description" content="لعبة زار تفاعلية بأجواء المقاهي البغدادية والتراث العراقي الأصيل">
     <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/casino-dice.png">
 
-    <!-- استدعاء مكتبة ساوند كلاود الرسمية للتحكم بالأغاني برمجياً -->
-    <script src="https://w.soundcloud.com/player/api.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=500;700;900&display=swap');
 
@@ -21,7 +18,6 @@
             --panel-dark: #0b0e15;
             --iraqi-shadhar: #00d2ff;
             --iraqi-kahraman: #ffb300;
-            --soundcloud-orange: #ff5500;
             --soft-green: #2ecc71;
             --btn-disabled: #131722;
         }
@@ -48,13 +44,14 @@
 
         .top-player { transform: rotate(180deg); }
 
+        /* الحزام المركزي المعدل ليتسع للمشغل الأصلي */
         .center-bar {
             background: #0e121a;
             border-top: 1px dashed rgba(0, 210, 255, 0.15);
             border-bottom: 1px dashed rgba(255, 179, 0, 0.15);
-            padding: 6px 10px; display: flex;
+            padding: 8px 10px; display: flex;
             justify-content: space-between; align-items: center;
-            z-index: 10; gap: 8px;
+            z-index: 10; gap: 6px;
         }
 
         .top-player.active-turn { border-color: rgba(255, 179, 0, 0.25); box-shadow: inset 0 0 20px rgba(255, 179, 0, 0.05); }
@@ -124,37 +121,30 @@
             padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
             cursor: pointer; transition: 0.2s; font-family: 'Tajawal', sans-serif;
         }
-
-        /* زر ساوند كلاود البرتقالي المتوهج */
-        .tarab-btn {
-            background: rgba(255, 85, 0, 0.04);
-            border: 1px solid rgba(255, 85, 0, 0.25);
-            color: var(--soundcloud-orange);
-            padding: 6px 12px;
-            display: flex; align-items: center; gap: 6px;
-            font-size: 11px; font-weight: 700; border-radius: 8px;
-            cursor: pointer; transition: all 0.2s ease;
-            font-family: 'Tajawal', sans-serif; flex: 1; justify-content: center; max-width: 150px;
-        }
-        .tarab-btn.playing {
-            background: rgba(255, 85, 0, 0.15);
-            border-color: var(--soundcloud-orange);
-            box-shadow: 0 0 12px rgba(255, 85, 0, 0.25);
+        .sound-select {
+            background: #141924; border: 1px solid #20293a; color: var(--iraqi-kahraman);
+            padding: 5px; border-radius: 8px; font-size: 11px; font-weight: 700; outline: none;
+            font-family: 'Tajawal', sans-serif; cursor: pointer;
         }
 
-        .audio-visualizer {
-            display: flex; align-items: flex-end; gap: 2px; width: 12px; height: 10px;
+        /* تصميم كادر مشغل ساوند كلاود المدمج المتوافق مع التصميم المظلم للعبة */
+        .sc-embed-container {
+            flex: 1;
+            max-width: 170px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #20293a;
+            background: #000;
         }
-        .audio-visualizer span {
-            display: block; width: 2px; background: var(--soundcloud-orange); height: 2px; border-radius: 0.5px;
-        }
-        .tarab-btn.playing .audio-visualizer span {
-            animation: bounceVisualizer 0.5s infinite alternate;
-        }
-        .tarab-btn.playing .audio-visualizer span:nth-child(2) { animation-delay: 0.15s; }
-        .tarab-btn.playing .audio-visualizer span:nth-child(3) { animation-delay: 0.3s; }
 
-        @keyframes bounceVisualizer { 0% { height: 2px; } 100% { height: 10px; } }
+        .sc-embed-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
 
         .history-container { width: 88%; max-width: 320px; margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
         .history-label { font-size: 10px; color: #49566e; text-align: right; }
@@ -173,12 +163,6 @@
         .card-p2 .card-text { color: var(--iraqi-kahraman); }
 
         .shake-hint { font-size: 9px; color: #161c26; margin-top: 4px; }
-
-        /* مشغل ساوند كلاود المخفي */
-        #soundcloud-hidden-player {
-            position: absolute; left: -9999px; top: -9999px;
-            width: 1px; height: 1px; visibility: hidden;
-        }
     </style>
 </head>
 <body>
@@ -205,17 +189,14 @@
         <div class="shake-hint" id="shake-p2">أو هز التلفون حتى ترمي</div>
     </div>
 
-    <!-- الحزام المركزي العراقي المطور -->
+    <!-- الحزام المركزي المطور بالمشغل المباشر الآمن للموبايل -->
     <div class="center-bar">
-        <button class="center-btn" onclick="determineStarter(); requestSensorPermission();" style="padding: 6px 8px;">🎲 منو يبدي?</button>
+        <button class="center-btn" onclick="determineStarter(); requestSensorPermission();" style="padding: 6px 6px;">🎲 قرعة</button>
         
-        <!-- زر ساوند كلاود المطور بنظام الاستدعاء المباشر المانع للحجب -->
-        <button class="tarab-btn" id="tarabRadioBtn" onclick="toggleSoundCloudRandom(); requestSensorPermission();">
-            <div class="audio-visualizer" id="audioVis">
-                <span></span><span></span><span></span>
-            </div>
-            <span id="tarabTrackName">☁️ أثير ساوند كلاود</span>
-        </button>
+        <!-- مشغل ساوند كلاود المصغر الأصلي بقائمتك الشخصية - حماية 100% من الحظر -->
+        <div class="sc-embed-container">
+            <iframe src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/ganat-ganat-412122592/sets/j0eltcfsmhvv&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false&single_active=true"></iframe>
+        </div>
 
         <div style="display: flex; gap: 4px; align-items: center;">
             <button class="center-btn" onclick="toggleFullscreen()" style="padding: 6px 6px;">🖥️</button>
@@ -225,9 +206,6 @@
             </select>
         </div>
     </div>
-
-    <!-- قائمة تشغيل الساوند كلاود الخاصة بك -->
-    <iframe id="soundcloud-hidden-player" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/ganat-ganat-412122592/sets/j0eltcfsmhvv&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false" allow="autoplay"></iframe>
 
     <!-- اللاعب 1 -->
     <div class="player-zone bottom-player active-turn" id="zone-1">
@@ -257,55 +235,6 @@
         let winScores = { 1: 0, 2: 0 };
         let wakeLock = null;
         let motionPermissionGranted = false;
-
-        // ربط وهندسة مشغل ساوند كلاود
-        let scIframe = document.getElementById('soundcloud-hidden-player');
-        let scWidget = SC.Widget(scIframe);
-        let isWidgetReady = false;
-        let totalTracksCount = 0; // تخزين عدد الأغاني لمنع حظر الصوت بالموبايل
-
-        scWidget.bind(SC.Widget.Events.READY, function() {
-            isWidgetReady = true;
-            // جلب عدد الأغاني مسبقاً وتخزينه في الذاكرة لتفادي الـ Async الحاظر للصوت
-            scWidget.getSounds(function(sounds) {
-                if (sounds && sounds.length > 0) {
-                    totalTracksCount = sounds.length;
-                }
-            });
-        });
-
-        scWidget.bind(SC.Widget.Events.PLAY, function() {
-            scWidget.getCurrentSound(function(sound) {
-                if (sound) {
-                    let trackName = sound.title.length > 15 ? sound.title.substring(0, 14) + ".." : sound.title;
-                    document.getElementById('tarabTrackName').innerText = "🎶 " + trackName;
-                }
-            });
-            document.getElementById('audioVis').classList.add('playing');
-            document.getElementById('tarabRadioBtn').classList.add('playing');
-        });
-
-        scWidget.bind(SC.Widget.Events.PAUSE, function() {
-            document.getElementById('tarabTrackName').innerText = "استراحة نغم";
-            document.getElementById('audioVis').classList.remove('playing');
-            document.getElementById('tarabRadioBtn').classList.remove('playing');
-        });
-
-        // دالة التبديل العشوائي الفورية المتوافقة مع حماية الموبايل (User Gesture Strict Mode)
-        function toggleSoundCloudRandom() {
-            if (!scWidget) return;
-            
-            // إذا لم تجهز الأكواد بعد، يعمل كـ Play/Pause تقليدي لحين جلب البيانات
-            if (!isWidgetReady || totalTracksCount === 0) {
-                scWidget.toggle();
-                return;
-            }
-            
-            // اختيار فوري ومتزامن يكسر حظر المتصفح
-            let randomIndex = Math.floor(Math.random() * totalTracksCount);
-            scWidget.skip(randomIndex);
-            scWidget.play();
-        }
 
         async function requestSensorPermission() {
             if (motionPermissionGranted) return;
